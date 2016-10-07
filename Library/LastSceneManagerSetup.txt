@@ -1,0 +1,4 @@
+sceneSetups:
+- path: Assets/Obstacle Course.unity
+  isLoaded: 1
+  isActive: 1
