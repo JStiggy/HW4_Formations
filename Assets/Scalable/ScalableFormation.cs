@@ -2,17 +2,41 @@
 using System.Collections;
 
 public class ScalableFormation : MonoBehaviour {
+	
 
     public int formationNumber = 1;
-    public Transform[] unitTransforms;
+    public StaticFollow[] units;
 
-    public float linearFormSeperation = 2f;
+    public float spacing = .5f;
+
+
+	public void changeFormation(int columns)
+	{
+		//-z is backwards, x is sideways.
+		formationNumber = columns;
+		float formationWidth = spacing * columns;
+		
+		for(int i = 0; i < units.Length; i++)
+		{
+			float x = formationWidth / 2 + ((i % columns) * spacing);
+			float z = -(spacing + (i / columns) * formationWidth);
+			units[i].moveTo(new Vector3(x, 0, z));
+		}
+	}
 
 	// Use this for initialization
 	void Start () {
 
+		GameObject[] obj = GameObject.FindGameObjectsWithTag("follower");
+		units = new StaticFollow[obj.Length];
+		for (int i = 0; i < obj.Length; i++)
+		{
+			units[i] = obj[i].GetComponent<StaticFollow>();
+			units[i].transform.parent = transform;
+		}
+		changeFormation(formationNumber);
 	}
-	
+	/*
 	// Update is called once per frame
 	void Update () {
         switch (formationNumber)
@@ -66,5 +90,5 @@ public class ScalableFormation : MonoBehaviour {
         }
 
     }
-
+	*/
 }
