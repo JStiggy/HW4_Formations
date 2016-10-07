@@ -53,12 +53,12 @@ public class ObstacleAvoidance : MonoBehaviour {
         if(avoidanceTarget != Vector3.zero)
         {
             rayReform = 0f;
-            Debug.Log("Avoid " + avoidanceTarget);
+            //Debug.Log("Avoid " + avoidanceTarget);
             this.Seek(avoidanceTarget);
         }
         else 
         {
-            Debug.Log("Node " + target.transform.position);
+            //Debug.Log("Node " + target.transform.position);
             this.Seek(target.transform.position);
         }
     }

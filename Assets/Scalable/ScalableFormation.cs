@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class ScalableFormation : MonoBehaviour {
+public class ScalableFormation : ConnorFormation {
 	
 
     public int formationNumber = 1;
@@ -10,16 +10,17 @@ public class ScalableFormation : MonoBehaviour {
     public float spacing = .5f;
 
 
-	public void changeFormation(int columns)
+	public override void changeFormation(int columns)
 	{
 		//-z is backwards, x is sideways.
 		formationNumber = columns;
-		float formationWidth = spacing * columns;
+		float formationWidth = spacing * columns - spacing;
 		
 		for(int i = 0; i < units.Length; i++)
 		{
-			float x = formationWidth / 2 + ((i % columns) * spacing);
-			float z = -(spacing + (i / columns) * formationWidth);
+			float x = formationWidth / 2 - ((i % columns) * spacing);
+			print(x);
+			float z = -(spacing + (i / columns) * spacing);
 			units[i].moveTo(new Vector3(x, 0, z));
 		}
 	}
@@ -33,6 +34,7 @@ public class ScalableFormation : MonoBehaviour {
 		{
 			units[i] = obj[i].GetComponent<StaticFollow>();
 			units[i].transform.parent = transform;
+			units[i].transform.localEulerAngles = new Vector3(0,0,0);
 		}
 		changeFormation(formationNumber);
 	}
