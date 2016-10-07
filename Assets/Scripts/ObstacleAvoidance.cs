@@ -8,7 +8,7 @@ public class ObstacleAvoidance : MonoBehaviour {
 
     public Vector3 avoidanceTarget;
 
-    public Rigidbody actorRigidBody;
+    public float linearSpeed;
     public float maxLinearSpeed;
     public float maxLinearAcceleration;
     public float maxAngularAcceleration;
@@ -25,7 +25,6 @@ public class ObstacleAvoidance : MonoBehaviour {
     void Start()
     {
         target = currentNode.gameObject;
-        actorRigidBody = this.GetComponent<Rigidbody>();
     }
 
     void Update()
@@ -83,15 +82,16 @@ public class ObstacleAvoidance : MonoBehaviour {
     {
         Vector3 direction = (destination - this.transform.position).normalized;
 
-        Quaternion orientation = Quaternion.LookRotation(direction);
-        transform.rotation = Quaternion.Slerp(transform.rotation, orientation, Time.deltaTime);
-        appliedForce = Vector3.ClampMagnitude(transform.forward * maxLinearAcceleration, Mathf.Abs(maxLinearAcceleration));
+        float angularAcceleration = Mathf.Atan2(direction.x, direction.z) * Mathf.Rad2Deg;
 
-        actorRigidBody.AddForce(appliedForce);
+        Vector3 eulerAngleVelocity = new Vector3(0, angularAcceleration, 0);
+        Quaternion deltaRotation = Quaternion.Euler(eulerAngleVelocity);
+        transform.rotation = Quaternion.Slerp(transform.rotation, deltaRotation, Time.deltaTime);
+        transform.eulerAngles.Set (0f, transform.eulerAngles.y, 0f);
 
-        if (actorRigidBody.velocity.magnitude > maxLinearSpeed)
-        {
-            actorRigidBody.velocity = actorRigidBody.velocity.normalized * maxLinearSpeed;
-        }
+        linearSpeed = Mathf.Min(linearSpeed+maxLinearAcceleration, maxLinearSpeed);
+
+        transform.position += transform.forward * linearSpeed * Time.deltaTime;
+
     }
 }
