@@ -35,6 +35,11 @@ public class ScalableFormation : ConnorFormation
 	void Start()
 	{
 		agent = GetComponent<ObstacleAvoidance>();
+		Recalculate();
+	}
+
+	public void Recalculate()
+	{
 		GameObject[] obj = GameObject.FindGameObjectsWithTag("follower");
 		units = new StaticFollow[obj.Length];
 		for (int i = 0; i < obj.Length; i++)
@@ -62,6 +67,10 @@ public class ScalableFormation : ConnorFormation
 
 	bool proximityAlert()
 	{
+		if(units.Length < 1)
+		{
+			return false;
+		}
 		RaycastHit info;
 		Transform leftAgent = units[((units.Length - 1) / formationNumber) * formationNumber].transform;
 		Debug.DrawLine(leftAgent.position, leftAgent.position+leftAgent.right*whiskers);
