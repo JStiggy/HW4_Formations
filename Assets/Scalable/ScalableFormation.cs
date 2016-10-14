@@ -1,13 +1,19 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class ScalableFormation : ConnorFormation {
-	
+public class ScalableFormation : ConnorFormation
+{
 
-    public int formationNumber = 1;
-    public StaticFollow[] units;
 
-    public float spacing = .5f;
+	public int formationNumber = 1;
+	public StaticFollow[] units;
+
+	public float spacing = .5f;
+
+	public ObstacleAvoidance agent;
+	float maxAV;
+	public float whiskers = 1;
+	public float avoidSpeed = 1;
 
 
 	public override void changeFormation(int columns)
@@ -15,82 +21,69 @@ public class ScalableFormation : ConnorFormation {
 		//-z is backwards, x is sideways.
 		formationNumber = columns;
 		float formationWidth = spacing * columns - spacing;
-		
-		for(int i = 0; i < units.Length; i++)
+
+		for (int i = 0; i < units.Length; i++)
 		{
 			float x = formationWidth / 2 - ((i % columns) * spacing);
-			print(x);
+			//print(x);
 			float z = -(spacing + (i / columns) * spacing);
 			units[i].moveTo(new Vector3(x, 0, z));
 		}
 	}
 
 	// Use this for initialization
-	void Start () {
-
+	void Start()
+	{
+		agent = GetComponent<ObstacleAvoidance>();
 		GameObject[] obj = GameObject.FindGameObjectsWithTag("follower");
 		units = new StaticFollow[obj.Length];
 		for (int i = 0; i < obj.Length; i++)
 		{
 			units[i] = obj[i].GetComponent<StaticFollow>();
 			units[i].transform.parent = transform;
-			units[i].transform.localEulerAngles = new Vector3(0,0,0);
+			units[i].transform.localEulerAngles = new Vector3(0, 0, 0);
 		}
 		changeFormation(formationNumber);
 	}
-	/*
-	// Update is called once per frame
-	void Update () {
-        switch (formationNumber)
-        {
-            case 0:
-                linearFormation();
-                break;
-            case 1:
-                twoFormation();
-                break;
-            default:
-                linearFormation();
-                break;
-        }
+
+	void Update()
+	{
+		if (proximityAlert())
+		{
+			print("proximityAlert!");
+			agent.canRotate = false;
+		}
+		else
+		{
+			agent.canRotate = true;
+		}
 	}
 
-    private void linearFormation()
-    {
-        int i = 1;
-        foreach(Transform t in unitTransforms)
-        {
-            if(t.gameObject.activeInHierarchy)
-            {
-               
-                t.position = Vector3.Lerp(t.position, this.transform.position - this.transform.forward * i * linearFormSeperation, Time.deltaTime);
-                ++i;
-            }
-            
-        }
 
-    }
+	bool proximityAlert()
+	{
+		RaycastHit info;
+		Transform leftAgent = units[((units.Length - 1) / formationNumber) * formationNumber].transform;
+		Debug.DrawLine(leftAgent.position, leftAgent.position+leftAgent.right*whiskers);
+		if (Physics.Raycast(leftAgent.position, leftAgent.right, out info, whiskers, LayerMask.GetMask("Obstacle")))
+		{
+			if (!info.transform.GetComponent<ScalableFormation>())
+			{
+				transform.Translate(-agent.maxLinearSpeed * Time.deltaTime * avoidSpeed, 0, 0);
+				return true;
+			}
+		}
 
-    private void twoFormation()
-    {
-        int i = 1;
-        foreach (Transform t in unitTransforms)
-        {
-            if (t.gameObject.activeInHierarchy)
-            {
-                if (i % 2 == 0)
-                {
-                    t.position = Vector3.Lerp(t.position, this.transform.position - (this.transform.forward * (i-1) * linearFormSeperation) + this.transform.right, Time.deltaTime);
-                    ++i;
-                } else if (i % 2 == 1)
-                {
-                    t.position = Vector3.Lerp(t.position, this.transform.position - (this.transform.forward * i * linearFormSeperation) - this.transform.right, Time.deltaTime);
-                    ++i;
-                }
-            }
-
-        }
-
-    }
-	*/
+		Transform rightAgent = units[(units.Length - 1)].transform;
+		Debug.DrawLine(rightAgent.position, rightAgent.position - rightAgent.right * whiskers);
+		if (Physics.Raycast(rightAgent.position, -rightAgent.right, out info, whiskers, LayerMask.GetMask("Obstacle"))) 
+		{
+			if (!info.transform.GetComponent<ScalableFormation>())
+			{
+				transform.Translate(agent.maxLinearSpeed * Time.deltaTime * avoidSpeed, 0, 0);
+				return true;
+			}
+		}
+		return false;
+	}
 }

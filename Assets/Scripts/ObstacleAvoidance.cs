@@ -21,6 +21,7 @@ public class ObstacleAvoidance : MonoBehaviour {
 
     public Vector3 appliedTorque;
     public Vector3 appliedForce;
+	public bool canRotate = true;
 
     void Start()
     {
@@ -86,9 +87,12 @@ public class ObstacleAvoidance : MonoBehaviour {
 
         Vector3 eulerAngleVelocity = new Vector3(0, angularAcceleration, 0);
         Quaternion deltaRotation = Quaternion.Euler(eulerAngleVelocity);
-        transform.rotation = Quaternion.Slerp(transform.rotation, deltaRotation, Time.deltaTime);
-        transform.eulerAngles.Set (0f, transform.eulerAngles.y, 0f);
-
+		if (canRotate)
+		{
+			transform.rotation = Quaternion.Slerp(transform.rotation, deltaRotation, Time.deltaTime);
+        
+			transform.eulerAngles.Set (0f, transform.eulerAngles.y, 0f);
+		}
         linearSpeed = Mathf.Min(linearSpeed+maxLinearAcceleration, maxLinearSpeed);
 
         transform.position += transform.forward * linearSpeed * Time.deltaTime;

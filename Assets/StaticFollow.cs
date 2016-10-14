@@ -14,8 +14,9 @@ public class StaticFollow : MonoBehaviour {
 	float progress;
 	Transform t;
 
-	void Start()
+	void Awake()
 	{
+
 		t = transform;
 	}
 	public void moveTo(Vector3 dest)
@@ -43,4 +44,6 @@ public class StaticFollow : MonoBehaviour {
 			}
 		}
 	}
+
+	
 }
