@@ -25,7 +25,10 @@ public class ObstacleAvoidance : MonoBehaviour {
 
     void Start()
     {
-        target = currentNode.gameObject;
+		if (!target && currentNode)
+		{
+			target = currentNode.gameObject;
+		}
     }
 
     void Update()
