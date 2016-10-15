@@ -3,6 +3,9 @@ using System.Collections;
 
 public class CollisionPrediction : ObstacleAvoidance {
 
+    //Formation script
+    public TwoLevelFormation formation;
+
     //Vector to seek
     public Vector3 seekTarget = Vector3.zero;
 
@@ -24,13 +27,15 @@ public class CollisionPrediction : ObstacleAvoidance {
 
     void Update()
     {
+        //Check for evasions
         this.rayAvoidance();
         this.predictionAvoidance();
 
+        //Weight the different vectors for movement
         if (avoidanceTarget != Vector3.zero)
         {
             rayReform = 0f;
-            this.Seek( (avoidanceTarget - this.transform.position) * .6f + firstRelPostion *.4f);
+            this.Seek( (avoidanceTarget - this.transform.position) * .6f + firstRelPostion *.1f + (seekTarget - this.transform.position) * .3f);
         }
         else
         {
@@ -40,9 +45,12 @@ public class CollisionPrediction : ObstacleAvoidance {
 
     public void rayAvoidance()
     {
+        //Slowly shrink the angle between the two arrays
         rayReform += Time.deltaTime / 50;
+        //This will prevent rays from diverging after converging
         rayReform = Mathf.Min(rayReform, .45f);
         Vector3[] raycastArrays = new Vector3[2];
+        //Both rays start at a 45 degree angle from forward, ray reform will cause them to converge
         raycastArrays[0] = (transform.forward * (.55f + rayReform) + transform.right * (.45f - rayReform)).normalized;
         raycastArrays[1] = (transform.forward * (.55f + rayReform) + transform.right * -(.45f - rayReform)).normalized;
         RaycastHit hit;
@@ -54,7 +62,8 @@ public class CollisionPrediction : ObstacleAvoidance {
             if (Physics.Raycast(this.transform.position, raycastArrays[i], raycastDistance, 1 << 8))
             {
                 Physics.Raycast(this.transform.position, raycastArrays[i], out hit, raycastDistance, 1 << 8);
-                Debug.DrawRay(hit.point, hit.normal * (avoidanceDistance - 1), Color.red);
+                Gizmos.DrawLine(this.transform.position, raycastArrays[i]);
+                //Debug.DrawRay(hit.point, hit.normal * (avoidanceDistance - 1), Color.red);
                 avoidanceTarget = hit.point + hit.normal * avoidanceDistance;
                 rayCount++;
             }
@@ -131,5 +140,13 @@ public class CollisionPrediction : ObstacleAvoidance {
             transform.position += transform.forward * linearSpeed * Time.deltaTime * maxAngularAcceleration;
         }
     }
+
+    void OnDisable()
+    {
+        formation.followerUnits.Remove(this);
+        formation.formPositions.RemoveRange(formation.formPositions.Count - 1,1);
+        formation.delegatePositions();
+    }
+
 }
 

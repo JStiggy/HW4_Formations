@@ -2,29 +2,46 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+
 public class TwoLevelFormation : MonoBehaviour
 {
-
+    //Current target for the invisible leader
     public Node currentNode;
     public GameObject target;
 
+    //Values used to control the movement of the leader
     public float linearSpeed;
     public float maxLinearSpeed;
     public float maxLinearAcceleration;
     public float maxAngularAcceleration;
     public float slowDistance;
 
+    //The current formation being deployed by the followers
     public int formationNumber = 1;
 
-    public CollisionPrediction[] followerUnits;
-    private List<Vector3> formPositions;
+    //Values used to determine the positions of all units
+    public List<CollisionPrediction> followerUnits;
+    public List<Vector3> formPositions;
 
+    //Used as offset values for each formation
     float linearFormSeperation = 3f;
     float twoFormationSeperation = 2f;
 
     void Start()
     {
+        //Seek the next node
         target = currentNode.gameObject;
+
+        //Get all units in the formation and add them to the list
+        followerUnits = new List<CollisionPrediction>();
+        foreach (GameObject go in GameObject.FindGameObjectsWithTag("Unit"))
+        {
+            CollisionPrediction c = go.GetComponent<CollisionPrediction>();
+            c.formation = this;
+            followerUnits.Add(c);
+        }
+
+        //Set up a list of positions for the formation based on the current position of the leader
         formPositions = new List<Vector3>();
         formPositions.Clear();
         switch (formationNumber)
@@ -39,10 +56,11 @@ public class TwoLevelFormation : MonoBehaviour
                 linearFormation();
                 break;
         }
+        //Determine which units correspond to which slots
         delegatePositions();
     }
 
-    // Update is called once per frame
+    // Constantly update the slots in the formation
     void Update()
     {
         this.CheckPath();
@@ -63,6 +81,7 @@ public class TwoLevelFormation : MonoBehaviour
         updatePositions();
     }
 
+    //Update the transforms for all the follower units
     private void updatePositions()
     {
         for(int i = 0 ; i < formPositions.Count; ++i)
@@ -71,16 +90,29 @@ public class TwoLevelFormation : MonoBehaviour
         }
     }
 
-    private void delegatePositions()
+    //When a formation is created, iterate through all positions and add the closest unit to the slot
+    public void delegatePositions()
     {
         int i = 0;
         float distance = 10000;
+        //If no followers exist don't delegate positions
+        if (0 == followerUnits.Count)
+        {
+            return;
+        }
         CollisionPrediction closest = followerUnits[0];
-        List<CollisionPrediction> gO = followerUnits.ToList();
+        List<CollisionPrediction> gO = new List<CollisionPrediction>( followerUnits);
+
+        //Itreate through all positions and set the closest unit to the slot
         foreach (Vector3 p in formPositions)
         {
+
             foreach (CollisionPrediction g in gO)
             {
+                if(g == null)
+                {
+                    continue;
+                }
                 float curDist = Vector3.Distance(p, g.transform.position);
                 if (curDist < distance)
                 {
@@ -88,14 +120,21 @@ public class TwoLevelFormation : MonoBehaviour
                     closest = g;
                 }
             }
+            //Remove the unit from the list
             gO.Remove(closest);
             closest.seekTarget = p;
             distance = 10000;
+            /*
+              Set the unit in the equivalent location in the list
+              This allows for the unit to be more likely to be selected for this position
+              the next time delegate positon is called
+            */
             followerUnits[i] = closest;
             i++;
         }
     }
 
+    //Determine the positions of the units
     private void linearFormation()
     {
         int i = 1;
@@ -109,6 +148,7 @@ public class TwoLevelFormation : MonoBehaviour
         }
     }
 
+    //Determine the ppositions of the units
     private void twoFormation()
     {
         int i = 1;
@@ -130,6 +170,7 @@ public class TwoLevelFormation : MonoBehaviour
         }
     }
 
+    //Used to determine if the current node has changed
     public void CheckPath()
     {
         if (currentNode != null)
@@ -145,7 +186,7 @@ public class TwoLevelFormation : MonoBehaviour
         }
     }
 
-
+    //Allows for the leader follow the path
     public void Seek(Vector3 destination)
     {
         Vector3 direction = (destination - this.transform.position).normalized;
