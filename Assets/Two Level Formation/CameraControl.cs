@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class Camera : MonoBehaviour {
+public class CameraControl: MonoBehaviour {
 
     public Transform target;
     public float distance;

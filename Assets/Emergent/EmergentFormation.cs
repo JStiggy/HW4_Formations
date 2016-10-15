@@ -8,7 +8,7 @@ public class EmergentFormation : MonoBehaviour
 
 	public ObstacleAvoidance agent;
 
-	public Transform targetPrefab;
+	public Slot targetPrefab;
 
 	public Transform target;
 
@@ -47,6 +47,7 @@ public class EmergentFormation : MonoBehaviour
 		{
 			if (children[i].occupier == obj)
 			{
+				children[i].blocked = Time.time;
 				children[i].occupier = null;
 			}
 		}
@@ -78,8 +79,13 @@ public class EmergentFormation : MonoBehaviour
 			if (!place(obj))
 			{
 				obj.isLeader = true;
+				isLeader = true;
 			}
-			isLeader = true;
+			else
+			{
+				isLeader = true;
+				return true;
+			}
 		}
 		return false;
 	}
@@ -107,9 +113,10 @@ public class EmergentFormation : MonoBehaviour
 		agent = GetComponent<ObstacleAvoidance>();
 		if (!isLeader)
 		{
-			
-		target = Instantiate(targetPrefab);
-		defaultSpeed = agent.maxLinearSpeed;
+			Slot t = Instantiate(targetPrefab);		
+			target = t.transform;
+			t.owner = this;
+			defaultSpeed = agent.maxLinearSpeed;
 			agent.target = target.gameObject;
 			reposition();
 		}
@@ -126,7 +133,16 @@ public class EmergentFormation : MonoBehaviour
 		{
 			target.parent = parent.transform;
 			target.localPosition = parent.getNode(this).relativePosition;
+			if (!target.GetComponent<Slot>().ok())
+			{
+				reposition();
+				return;
+			}
 			//agent.target = target.gameObject;
+		}
+		else
+		{
+			print("ERROR CAN'T BE PLACED");
 		}
 		for(int i = 0; i < children.Length; i++)
 		{
@@ -138,31 +154,43 @@ public class EmergentFormation : MonoBehaviour
 	}
 
 	
-	//bool catchingUp = true;
+	public bool catchingUp = true;
 	void Update()
 	{
 		if (isLeader)
 		{
 			return;
 		}
+		Debug.DrawLine(transform.position, target.transform.position,Color.cyan);
 		if ((transform.position - target.position).magnitude > panicRange)
 		{//we're catching up to the spot in our formation.
-			agent.maxLinearSpeed += panicAcceleration * Time.deltaTime;
+			agent.maxLinearSpeed = panicAcceleration;
+			catchingUp = true;
 		}
 		else {
+			catchingUp = false;
 			agent.maxLinearSpeed = defaultSpeed;
-			Collider[] col = Physics.OverlapSphere(transform.position, shynessRange, (1 << (LayerMask.NameToLayer("Unit")) | (1 << LayerMask.NameToLayer("Obstacle"))));
+			/*Collider[] col = Physics.OverlapSphere(transform.position, shynessRange, (1 << (LayerMask.NameToLayer("Unit")) | (1 << LayerMask.NameToLayer("Obstacle"))));
 			//print("Unit: " + (1<<LayerMask.NameToLayer("Unit"))+ " obstacle " + (1<<LayerMask.NameToLayer("Obstacle")) + " total " + (1<<(LayerMask.NameToLayer("Unit")) | (1<<LayerMask.NameToLayer("Obstacle"))));
 			if (col.Length > 1)
 			{
+
 				print("colliding!");
 				for(int i = 0; i < col.Length; i++)
 				{
+					EmergentFormation other = col[i].GetComponent<EmergentFormation>();
+					if (other && col[i].GetComponent<EmergentFormation>().catchingUp)
+					{
+
+					}
+					else
+					{ 
+						parent.getNode(this).blocked = Time.time;
+						reposition();
+					}
 					print(col[i]);
 				}
-				parent.getNode(this).blocked = Time.time;
-				reposition();
-			}
+			}*/
 		}
 	}
 }

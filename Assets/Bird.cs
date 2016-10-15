@@ -9,7 +9,7 @@ public class Bird : MonoBehaviour {
 	// Update is called once per frame
 	void Update () {
 		RaycastHit info;
-		Physics.Raycast(Camera.current.ScreenPointToRay(Input.mousePosition), out info);
+		Physics.Raycast(Camera.main.ScreenPointToRay(Input.mousePosition), out info);
 		//print(Camera.current + "  " + Input.mousePosition + "  " + info);
 		transform.position = info.point;
 

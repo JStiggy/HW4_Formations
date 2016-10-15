@@ -37,8 +37,8 @@ public class ObstacleAvoidance : MonoBehaviour {
         rayReform += Time.deltaTime / 100;
         rayReform = Mathf.Min(rayReform, .2f);
         Vector3[] raycastArrays = new Vector3[2];
-        raycastArrays[0] = (transform.forward * (.8f + rayReform) + transform.right * (.2f - rayReform) ).normalized;
-        raycastArrays[1] = (transform.forward * (.8f + rayReform) + transform.right * -(.2f - rayReform) ).normalized;
+		raycastArrays[0] = (transform.forward * (.8f + rayReform) + transform.right * (.2f - rayReform) ).normalized;
+		raycastArrays[1] = (transform.forward * (.8f + rayReform) + transform.right * -(.2f - rayReform) ).normalized;
         RaycastHit hit;
         avoidanceTarget = Vector3.zero;
         int rayCount = 0;
@@ -49,13 +49,22 @@ public class ObstacleAvoidance : MonoBehaviour {
             {
                 Physics.Raycast(this.transform.position, raycastArrays[i], out hit, raycastDistance, 1 << 8);
                 Debug.DrawRay(hit.point, hit.normal * (avoidanceDistance - 1), Color.red);
-                avoidanceTarget = hit.point + hit.normal * avoidanceDistance;
+
+				//This code cuts out some (but not all, unfortunately) cases where following the avoidvector produces bad behavior. 
+				Vector3 tavoid = hit.point + hit.normal * avoidanceDistance;
+				Vector3 rdist = tavoid - hit.point;
+				Vector3 dspot = rdist + transform.position;
+				if ((target.transform.position - dspot).magnitude > (target.transform.position - transform.position).magnitude)
+				{
+					avoidanceTarget = tavoid;
+				}
                 rayCount++;
             }
         }
 
         if(avoidanceTarget != Vector3.zero)
         {
+
             rayReform = 0f;
             //Debug.Log("Avoid " + avoidanceTarget);
             this.Seek(avoidanceTarget);

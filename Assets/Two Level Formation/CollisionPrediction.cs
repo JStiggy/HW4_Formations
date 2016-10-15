@@ -62,7 +62,7 @@ public class CollisionPrediction : ObstacleAvoidance {
             if (Physics.Raycast(this.transform.position, raycastArrays[i], raycastDistance, 1 << 8))
             {
                 Physics.Raycast(this.transform.position, raycastArrays[i], out hit, raycastDistance, 1 << 8);
-                Gizmos.DrawLine(this.transform.position, raycastArrays[i]);
+                //Gizmos.DrawLine(this.transform.position, raycastArrays[i]);
                 //Debug.DrawRay(hit.point, hit.normal * (avoidanceDistance - 1), Color.red);
                 avoidanceTarget = hit.point + hit.normal * avoidanceDistance;
                 rayCount++;
