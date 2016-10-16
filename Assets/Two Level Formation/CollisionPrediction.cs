@@ -62,7 +62,6 @@ public class CollisionPrediction : ObstacleAvoidance {
             if (Physics.Raycast(this.transform.position, raycastArrays[i], raycastDistance, 1 << 8))
             {
                 Physics.Raycast(this.transform.position, raycastArrays[i], out hit, raycastDistance, 1 << 8);
-                //Gizmos.DrawLine(this.transform.position, raycastArrays[i]);
                 //Debug.DrawRay(hit.point, hit.normal * (avoidanceDistance - 1), Color.red);
                 avoidanceTarget = hit.point + hit.normal * avoidanceDistance;
                 rayCount++;
@@ -146,6 +145,16 @@ public class CollisionPrediction : ObstacleAvoidance {
         formation.followerUnits.Remove(this);
         formation.formPositions.RemoveRange(formation.formPositions.Count - 1,1);
         formation.delegatePositions();
+    }
+
+    void OnGizmosDrawn()
+    {
+        Vector3[] raycastArrays = new Vector3[2];
+        //Both rays start at a 45 degree angle from forward, ray reform will cause them to converge
+        raycastArrays[0] = (transform.forward * (.55f + rayReform) + transform.right * (.45f - rayReform)).normalized;
+        raycastArrays[1] = (transform.forward * (.55f + rayReform) + transform.right * -(.45f - rayReform)).normalized;
+        Gizmos.DrawLine(this.transform.position, raycastArrays[0]);
+        Gizmos.DrawLine(this.transform.position, raycastArrays[1]);
     }
 
 }
