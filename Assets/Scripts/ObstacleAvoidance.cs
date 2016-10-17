@@ -64,14 +64,11 @@ public class ObstacleAvoidance : MonoBehaviour {
 
         if(avoidanceTarget != Vector3.zero)
         {
-
             rayReform = 0f;
-            //Debug.Log("Avoid " + avoidanceTarget);
             this.Seek(avoidanceTarget);
         }
         else 
         {
-            //Debug.Log("Node " + target.transform.position);
             this.Seek(target.transform.position);
         }
     }
@@ -94,15 +91,17 @@ public class ObstacleAvoidance : MonoBehaviour {
     public virtual void Seek(Vector3 destination)
     {
         Vector3 direction = (destination - this.transform.position).normalized;
-
         float angularAcceleration = Mathf.Atan2(direction.x, direction.z) * Mathf.Rad2Deg;
-
         Vector3 eulerAngleVelocity = new Vector3(0, angularAcceleration, 0);
         Quaternion deltaRotation = Quaternion.Euler(eulerAngleVelocity);
+		float t = maxAngularAcceleration * Time.deltaTime / Mathf.Abs(angularAcceleration);
+		t = Mathf.Clamp(t, 0, 1);
+		//print(t);
 		if (canRotate)
 		{
-			transform.rotation = Quaternion.Slerp(transform.rotation, deltaRotation, Time.deltaTime);
-        
+		//	print("Rotating from " + transform.rotation.eulerAngles + " to " + deltaRotation.eulerAngles + " with proportion " + t);
+			transform.rotation = Quaternion.Slerp(transform.rotation, deltaRotation, t);
+		//	print("results in " + transform.eulerAngles);
 			transform.eulerAngles.Set (0f, transform.eulerAngles.y, 0f);
 		}
         linearSpeed = Mathf.Min(linearSpeed+maxLinearAcceleration, maxLinearSpeed);

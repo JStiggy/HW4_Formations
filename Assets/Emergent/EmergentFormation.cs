@@ -193,4 +193,32 @@ public class EmergentFormation : MonoBehaviour
 			}*/
 		}
 	}
+
+	void OnDestroy()
+	{
+		if (parent)
+		{
+			parent.remove(this);
+		}
+		if (target)
+		{
+			Destroy(target.gameObject);
+		}
+		Slot[] childSlots = GetComponentsInChildren<Slot>();
+		for(int i = 0; i < childSlots.Length; i++)
+		{
+			childSlots[i].transform.parent = null;
+		}
+		for(int i = 0; i < children.Length; i++)
+		{
+			if (children[i].occupier&&root)
+			{
+				print("placing child.");
+				root.place(children[i].occupier);
+				children[i].occupier.target.parent = children[i].occupier.parent.transform;//yeah this would be refactored if it wasn't the last thing to be added. 
+				children[i].occupier.target.localPosition = children[i].occupier.parent.getNode(children[i].occupier).relativePosition;
+			}
+		}
+
+	}
 }
