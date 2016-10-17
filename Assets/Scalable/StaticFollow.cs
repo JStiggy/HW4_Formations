@@ -47,7 +47,10 @@ public class StaticFollow : MonoBehaviour {
 
 	void OnDestroy()
 	{
-		GetComponentInParent<ScalableFormation>().Recalculate();
+		if (GetComponentInParent<ScalableFormation>())
+		{
+			GetComponentInParent<ScalableFormation>().Recalculate();
+		}
 	}
 	
 }

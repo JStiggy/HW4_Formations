@@ -1,26 +1,40 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class Bird : MonoBehaviour {
-	/// <summary>
-	/// Follows the mouse and destroys any object with a destroyable component. 
-	/// </summary>
-	
-	// Update is called once per frame
-	void Update () {
-		RaycastHit info;
-		Physics.Raycast(Camera.main.ScreenPointToRay(Input.mousePosition), out info);
-		//print(Camera.current + "  " + Input.mousePosition + "  " + info);
-		transform.position = info.point;
+public class Bird : MonoBehaviour
+{
 
+
+	// Basic movement
+	void Update()
+	{
+		if (Input.GetAxisRaw("Horizontal") == -1)
+		{
+			this.transform.position += Vector3.left * 5 * Time.deltaTime;
+		}
+
+		if (Input.GetAxisRaw("Horizontal") == 1)
+		{
+			this.transform.position += Vector3.right * 5 * Time.deltaTime;
+		}
+
+		if (Input.GetAxisRaw("Vertical") == 1)
+		{
+			this.transform.position += Vector3.forward * 5 * Time.deltaTime;
+		}
+
+		if (Input.GetAxisRaw("Vertical") == -1)
+		{
+			this.transform.position += Vector3.forward * -5 * Time.deltaTime;
+		}
 	}
 
-	void OnTriggerEnter(Collider col)
+	//If the units enter the black bird, disable the unit
+	void OnTriggerEnter(Collider other)
 	{
-		print("overlapping" + col.gameObject);
-		if (col.GetComponent<Destroyable>())
+		if (other.GetComponent<Destroyable>())
 		{
-			Destroy(col.gameObject);
+			Destroy(other.gameObject);
 		}
 	}
 }

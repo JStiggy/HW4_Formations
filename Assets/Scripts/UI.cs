@@ -7,16 +7,19 @@ public class UI : MonoBehaviour {
 
 	public void LoadScalable ()
     {
+		print("loadingScalable");
         SceneManager.LoadScene(0);
 	}
 	
 	public void LoadEmergent ()
-    {
-        SceneManager.LoadScene(1);
+	{
+		print("loadingScalable");
+		SceneManager.LoadScene(1);
     }
 
     public void LoadTwoLevelFormation()
-    {
-        SceneManager.LoadScene(2);
+	{
+		print("loadingScalable");
+		SceneManager.LoadScene(2);
     }
 }
