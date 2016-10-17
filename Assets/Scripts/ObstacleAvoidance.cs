@@ -15,6 +15,7 @@ public class ObstacleAvoidance : MonoBehaviour {
     public float raycastDistance = 7f;
     public float avoidanceDistance = 6f;
     public float rayReform = 0f;
+    public float rate = 1f;
 
     public float slowDistance;
     public bool isEvading = false;
@@ -34,7 +35,7 @@ public class ObstacleAvoidance : MonoBehaviour {
     void Update()
     {
         this.CheckPath();
-        rayReform += Time.deltaTime / 100;
+        rayReform += Time.deltaTime * rate / 100;
         rayReform = Mathf.Min(rayReform, .2f);
         Vector3[] raycastArrays = new Vector3[2];
 		raycastArrays[0] = (transform.forward * (.8f + rayReform) + transform.right * (.2f - rayReform) ).normalized;
